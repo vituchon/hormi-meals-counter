@@ -1,0 +1,20 @@
+{
+  "name": "Hormi Meals Counter",
+  "short_name": "Hormi",
+  "description": "Sumá platos servidos en la olla popular, en vivo.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#efefef",
+  "theme_color": "#f2b933",
+  "icons": [
+    {
+      "src": "/assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

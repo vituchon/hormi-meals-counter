@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="/assets/app.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="/assets/toastr.css">
+  <script type="text/javascript" src="/assets/toastr.js"></script>
+
+  <title>Hormi Meals Counter</title>
+
+  <link rel="icon" type="image/svg+xml" href="/assets/icon.svg">
+  <link rel="apple-touch-icon" href="/assets/icon.svg">
+  <link rel="manifest" href="/assets/manifest.json">
+  <meta name="theme-color" content="#f2b933">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Hormi">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --terracotta:        #b8442a;
+      --terracotta-dark:   #7c2d12;
+      --terracotta-light:  #d97757;
+      --cream:             #fdf6e3;
+      --cream-soft:        #f7e9c9;
+      --olive:             #4d6b1f;
+      --olive-light:       #82a04b;
+      --roast:             #3a2415;
+      --roast-soft:        #6b4a2f;
+      --ant:               #1f1f1f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Quicksand', system-ui, -apple-system, sans-serif;
+      color: var(--roast);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #efefef;
+    }
+
+    /* ant trail decoration across the top */
+    body::before {
+      position: fixed;
+      top: 6px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 14px;
+      letter-spacing: 0;
+      opacity: 0.55;
+      pointer-events: none;
+      z-index: 0;
+      white-space: nowrap;
+      overflow: hidden;
+    }
+
+    .container {
+      background: var(--cream);
+      border: 2px solid var(--terracotta-light);
+      border-radius: 18px;
+      box-shadow:
+        0 10px 22px rgba(58, 36, 21, 0.25),
+        inset 0 0 0 6px rgba(255, 255, 255, 0.55);
+      padding: 28px 26px 22px;
+      text-align: center;
+      position: relative;
+      min-height: 15em;
+      min-width: 22em;
+      z-index: 1;
+    }
+
+    .ant-walker {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .ant-walker .ant {
+      position: absolute;
+      top: 0;
+      left: 0;
+      font-size: 14px;
+      line-height: 1;
+      offset-path: inset(-9px round 18px);
+      /*offset-rotate: 0deg; */ /* uncomment to keep them all horizontal */
+      transform: scaleX(-1);
+      animation: ant-stroll 22s linear infinite;
+    }
+
+    .ant-walker .ant-1 { animation-delay: 0s; }
+    .ant-walker .ant-2 { animation-delay: -7.3s; }
+    .ant-walker .ant-3 { animation-delay: -14.6s; }
+
+    @keyframes ant-stroll {
+      from { offset-distance: 0%; }
+      to   { offset-distance: 100%; }
+    }
+
+    .title {
+      font-weight: 700;
+      font-size: 1.55em;
+      letter-spacing: 0.01em;
+      margin-bottom: 14px;
+      color: var(--terracotta-dark);
+      line-height: 1.1;
+    }
+
+    .nickname, #encounter-id-to-join, #encounter-name-input {
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      margin-top: 5px;
+      border: 1.5px solid var(--terracotta-light);
+      border-radius: 10px;
+      font-size: 1em;
+      font-family: inherit;
+      background: #fffbf0;
+      color: var(--roast);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .nickname:focus, #encounter-id-to-join:focus, #encounter-name-input:focus {
+      border-color: var(--terracotta);
+      box-shadow: 0 0 0 3px rgba(184, 68, 42, 0.18);
+    }
+
+    .emotar-list {
+      max-height: 200px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 50px);
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+      padding: 8px;
+      background: var(--cream-soft);
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    .emotar-list::-webkit-scrollbar {
+      width: 8px;
+    }
+    .emotar-list::-webkit-scrollbar-thumb {
+      background: var(--terracotta-light);
+      border-radius: 4px;
+    }
+
+    .emotar {
+      font-size: 1.8em;
+      cursor: pointer;
+      user-select: none;
+      transition: transform 0.8s ease, top 0.8s ease, left 0.8s ease;
+      position: relative;
+      border-radius: 8px;
+    }
+
+    .emotar:hover {
+      transform: scale(1.2);
+      transition: 0.2s;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #e0a82a;
+      border: none;
+      color: var(--roast);
+      border-radius: 10px;
+      font-size: 1em;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(58, 36, 21, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    }
+
+    button:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 5px 10px rgba(58, 36, 21, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(58, 36, 21, 0.25);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      filter: grayscale(0.4);
+    }
+
+    .selected-emotar {
+      position: absolute;
+      transition: all 0.8s ease;
+    }
+
+    .fade-out {
+      opacity: 0 !important;
+      transition: opacity 1s ease;
+    }
+
+    .fade-in {
+      opacity: 1 !important;
+      transition: opacity 1s ease;
+    }
+
+    #nickname-view {
+      color: var(--cream);
+      text-shadow: 0 2px 6px rgba(58, 36, 21, 0.5);
+      font-weight: 700;
+    }
+
+    #selected-nickname {
+      opacity: 0;
+      color: var(--cream);
+      font-size: 2em;
+    }
+
+    #encounter-description-container {
+      color: #000;
+      font-weight: 700;
+      font-size: 1.5em;
+      margin-bottom: 0.6em;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      gap: 0.3em;
+      line-height: 1;
+    }
+
+    #participants-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1em 0;
+      font-size: 1.1em;
+      text-align: left;
+      min-width: 18em;
+      background: #fffbf0;
+      border-radius: 12px;
+      border: 1.5px dashed var(--terracotta-light);
+      padding: 6px 10px;
+    }
+
+    #participants-list li {
+      padding: 8px 6px;
+      border-bottom: 1px dashed rgba(184, 68, 42, 0.25);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    #participants-list li:last-child {
+      border-bottom: none;
+    }
+
+    #participants-list li.you {
+      background: linear-gradient(90deg, rgba(217, 119, 87, 0.18), transparent);
+      font-weight: 700;
+      border-radius: 6px;
+    }
+
+    .participant-count {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: var(--terracotta-dark);
+      background: var(--cream-soft);
+      padding: 2px 10px;
+      border-radius: 999px;
+      min-width: 2em;
+      text-align: center;
+    }
+
+    #total-served {
+      color: var(--terracotta-dark);
+      font-weight: 700;
+      font-size: 1.25em;
+    }
+
+    #total-served-count {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    #increment-button {
+      font-size: 1.9em;
+      padding: 0.5em 1.2em;
+      margin-top: 0.3em;
+      border-radius: 999px;
+      background: #f2b933;
+      color: var(--roast);
+      box-shadow:
+        0 8px 18px rgba(124, 90, 18, 0.4),
+        inset 0 -4px 0 rgba(0, 0, 0, 0.12),
+        inset 0 3px 0 rgba(255, 255, 255, 0.35);
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+
+    #increment-button:hover {
+      transform: translateY(-2px) scale(1.02);
+      filter: brightness(1.05);
+    }
+
+    #increment-button:active {
+      transform: scale(0.95);
+      box-shadow:
+        0 3px 8px rgba(124, 90, 18, 0.4),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.15);
+    }
+
+    #owner-actions {
+      margin-top: 1em;
+      display: none;
+      flex-direction: row;
+      gap: 0.6em;
+      justify-content: center;
+    }
+
+    #reset-button, #export-button {
+      background: #f2b933;
+      color: var(--roast);
+      box-shadow:
+        0 5px 12px rgba(124, 90, 18, 0.35),
+        inset 0 -3px 0 rgba(0, 0, 0, 0.12),
+        inset 0 2px 0 rgba(255, 255, 255, 0.35);
+    }
+
+    #share-button {
+      background: #e0a82a;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 1em;
+      height: 1em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 4px 8px rgba(58, 36, 21, 0.25);
+      padding: 0;
+      margin: 0;
+      transition: all 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+    }
+
+    #share-button-container {
+      display: flex;
+      align-items: center;
+    }
+
+    #share-button:hover {
+      transform: scale(1.3);
+      box-shadow: 0px 6px 12px rgba(58, 36, 21, 0.35);
+    }
+
+    #share-button:active {
+      transform: scale(0.95);
+      box-shadow: 0px 3px 6px rgba(58, 36, 21, 0.3);
+    }
+  </style>
+  <style>
+    #delete-encounters-button-container, #about-button-container {
+      position: fixed;
+      z-index: 1000;
+    }
+
+    #delete-encounters-button-container {
+      top: 10px;
+      left: 10px;
+    }
+
+    #delete-encounters-button {
+      background: #b8442a;
+      color: var(--cream);
+      font-size: 12px;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0px 4px 8px rgba(58, 36, 21, 0.25);
+    }
+
+    #delete-encounters-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 6px 12px rgba(58, 36, 21, 0.3);
+    }
+
+    #delete-encounters-button:active {
+      transform: scale(0.95);
+      box-shadow: 0px 3px 6px rgba(58, 36, 21, 0.3);
+    }
+
+    #about-button {
+      background: var(--olive);
+      color: var(--cream);
+      font-size: 14px;
+      padding: 8px 10px;
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0px 4px 8px rgba(58, 36, 21, 0.25);
+    }
+
+    #about-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0px 6px 12px rgba(58, 36, 21, 0.3);
+    }
+
+    #about-button-container {
+      bottom: 10px;
+      right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="delete-encounters-button-container" style="display: none;">
+    <button id="delete-encounters-button">
+      🗑️ Borrar Ollas
+    </button>
+  </div>
+
+  <div id="about-button-container">
+    <button id="about-button" style="color: transparent;  text-shadow: 0 0 0 white;">❔</button>
+  </div>
+  <dialog id="about-dialog" style="max-width: 75%;"></dialog>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const aboutDialog = document.getElementById('about-dialog');
+      const openAboutDialogButton = document.getElementById('about-button');
+
+      openAboutDialogButton.addEventListener('click', async () => {
+        try {
+          const response = await fetch('/assets/about.html');
+          if (!response.ok) {
+            throw new Error('Error al cargar el contenido');
+          }
+
+          const content = await response.text();
+          aboutDialog.innerHTML = content;
+          aboutDialog.showModal();
+          aboutDialog.scrollTop = 0;
+        } catch (error) {
+          console.error('Error:', error);
+          alert('No se pudo cargar el contenido del diálogo.');
+        }
+      });
+
+      aboutDialog.addEventListener('close', () => {
+        console.log('Diálogo cerrado');
+      });
+    });
+  </script>
+
+  <div id="emotar-selector-area" style="display: flex; flex-direction: column; align-items: center;">
+    <div id="emotar-selector" class="container" >
+      <div class="ant-walker" aria-hidden="true">
+        <span class="ant ant-1">🐜</span>
+        <span class="ant ant-2">🐜</span>
+        <span class="ant ant-3">🐜</span>
+      </div>
+      <div class="title" style="font-size: 1.4em; margin-bottom: 8px;">Elegí tu Emotar</div>
+      <div class="emotar-list" id="emotar-list">
+        <!-- Emotars  will be loaded here like `<div class="emotar" id="🐵">🐵</div>` for every emoji -->
+      </div>
+      <div>
+        <input type="text" id="nickname-input" class="nickname" placeholder="Apodo...">
+        <button id="confirm-emotar" disabled>Confirmar</button>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: center; margin-top: 0.5em;">
+        <input id="encounter-name-input" type="text" placeholder="Nombre de la olla (si vas a crear)...">
+        <input id="encounter-id-to-join" type="number" placeholder="Unirse a olla número...">
+      </div>
+    </div>
+    <div id="nickname-view" style="font-size: 3em;"></div>
+  </div>
+
+
+  <div id="encounter-area" class="container" style="display: none; flex-direction: column; align-items: center; justify-content: center;">
+    <div class="ant-walker" aria-hidden="true">
+      <span class="ant ant-1">🐜</span>
+      <span class="ant ant-2">🐜</span>
+      <span class="ant ant-3">🐜</span>
+    </div>
+    <div id="encounter-description-container">
+      <span id="encounter-description"></span>
+      <div id="share-button-container">
+        <button id="share-button" style="margin-left: 0.3em;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15">
+            <circle cx="5" cy="12" r="3" fill="white"></circle>
+            <circle cx="19" cy="5" r="3" fill="white"></circle>
+            <circle cx="19" cy="19" r="3" fill="white"></circle>
+            <line x1="7.5" y1="12" x2="16.5" y2="7" stroke="white" stroke-width="2"></line>
+            <line x1="7.5" y1="12" x2="16.5" y2="17" stroke="white" stroke-width="2"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <ul id="participants-list"></ul>
+    <div id="total-served">Suma de contadores: <span id="total-served-count">0</span></div>
+    <button id="increment-button">+1 🍲</button>
+    <div id="owner-actions">
+      <button id="reset-button">🔄 Reset</button>
+      <button id="export-button">⬇️ Exportar JSON</button>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as ServerApi from "./assets/server-api.js"
+    function initAppContainerScreen() {
+      document.getElementById('delete-encounters-button').addEventListener('click', async () => {
+        const confirmDelete = confirm('¿Estás seguro de que deseas borrar todas las ollas? Esta acción no se puede deshacer.');
+        if (confirmDelete) {
+          try {
+            await ServerApi.DefaultService.deleteAllEncounters();
+            displayMessage('¡Todas las ollas han sido borradas con éxito!');
+          } catch (error) {
+            console.warn('Error al borrar las ollas:', error);
+            displayErrorMessage('Hubo un error al intentar borrar las ollas.');
+          }
+        }
+      });
+    }
+    initAppContainerScreen();
+  </script>
+  <script type="module">
+    import * as ServerApi from "./assets/server-api.js"
+    import * as WebSockets from "./assets/ws.js";
+
+    function initLandingScreen() {
+      const emotars = [
+        "🐵", "🐶", "🐺", "🦊", "🦝", "🐱", "🦁", "🐯",
+        "🐮", "🐷", "🐭", "🐹", "🐰", "🐻", "🐨", "🐼",
+        "🐸", "🐧", "🦉", "🦄"];
+
+      const adjectives = [
+        "mysterious", "happy", "brave", "curious", "playful",
+        "sneaky", "wild", "gentle", "kind", "fierce",
+        "sassy", "clever", "sleepy", "funny", "bright"
+      ];
+
+      function generateRandomNickname() {
+        const randomAdjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const capitalizedRandomAdjective = randomAdjective[0].toLocaleUpperCase() + randomAdjective.slice(1, randomAdjective.length);
+        return `${capitalizedRandomAdjective}`;
+      }
+
+      function renderEmotars() {
+        const emotarListDiv = document.getElementById('emotar-list');
+        emotarListDiv.innerHTML = '';
+        emotars.forEach(emotar => {
+          const emotarDiv = document.createElement('div');
+          emotarDiv.className = 'emotar';
+          emotarDiv.textContent = emotar;
+          emotarDiv.id = emotar;
+          emotarDiv.onclick = () => selectEmotar(emotar, emotarDiv);
+          emotarListDiv.appendChild(emotarDiv);
+        });
+      }
+
+      const confirmEmotarButton = document.getElementById('confirm-emotar');
+      let selectedEmotar = null;
+      function selectEmotar(emotar, element) {
+        document.querySelectorAll('.emotar').forEach(el => el.style.border = 'none');
+        element.style.border = '2px solid #b8442a';
+        selectedEmotar = emotar;
+        confirmEmotarButton.disabled = false;
+      }
+
+      function confirmSelectEmotar(emotar) {
+        const emotarDiv = document.getElementById(emotar);
+        const emotarDivRect = emotarDiv.getBoundingClientRect();
+        const emotarCloneDiv = emotarDiv.cloneNode(true);
+        emotarCloneDiv.classList.add('selected-emotar');
+        emotarCloneDiv.style.fontSize = '1.8em';
+        emotarCloneDiv.style.top = `${emotarDivRect.top + 1}px`;
+        emotarCloneDiv.style.left = `${emotarDivRect.left + 7}px`;
+        emotarCloneDiv.style.position = 'absolute';
+        emotarCloneDiv.style.border = 'none';
+        document.body.appendChild(emotarCloneDiv);
+
+        const nicknameDiv = document.getElementById("nickname-view");
+        const nicknameInput = document.getElementById('nickname-input');
+        const emotarSelectorDiv = document.getElementById('emotar-selector');
+        emotarSelectorDiv.classList.add('fade-out');
+        new Promise((resolve) => {
+          setTimeout(async () => {
+            emotarCloneDiv.style.fontSize = '8em';
+            emotarCloneDiv.style.top = '50%';
+            emotarCloneDiv.style.left = '50%';
+            emotarCloneDiv.style.transform = 'translate(-50%, -50%)';
+            const nickname = nicknameInput.value || generateRandomNickname();
+            nicknameDiv.style.display = "block";
+            nicknameDiv.classList.add('fade-in');
+            nicknameDiv.innerText = nickname;
+
+            try {
+              var ws = await WebSockets.DefaultService.adquire();
+              setupWebsocket(ws);
+              console.log("Adquired ws is ", ws);
+              let player = {
+                name: nickname,
+                emotar: emotar,
+              };
+              app.clientPlayer = await ServerApi.DefaultService.registerPlayer(player);
+
+              if (app.clientPlayer.name.toLowerCase() == 'vituls') {
+                document.getElementById("delete-encounters-button-container").style.display = "block";
+              }
+
+              var encounterIdToJoin = document.getElementById("encounter-id-to-join").value;
+              if (!encounterIdToJoin) {
+                const encounterName = document.getElementById("encounter-name-input").value || `Olla de ${app.clientPlayer.name}`;
+                const encounter = {
+                  name: encounterName,
+                  owner: app.clientPlayer,
+                  players: [],
+                };
+                app.encounter = await ServerApi.DefaultService.createEncounter(encounter);
+                encounterIdToJoin = app.encounter.id;
+              }
+
+              app.encounter = await ServerApi.DefaultService.joinEncounter(encounterIdToJoin);
+              renderEncounter();
+              resolve();
+            } catch (err) {
+              displayErrorMessage(err.message || err);
+            }
+          }, 250);
+        }).then(() => {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              emotarCloneDiv.classList.add('fade-out');
+              nicknameDiv.classList.remove('fade-in');
+              nicknameDiv.classList.add('fade-out');
+              resolve();
+            }, 1000);
+          });
+        }).then(() => {
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const encounterAreaDiv = document.getElementById('encounter-area');
+              encounterAreaDiv.style.display = "flex";
+              encounterAreaDiv.style.opacity = "0";
+              encounterAreaDiv.classList.add('fade-in');
+
+              emotarSelectorDiv.style.display = "none";
+              nicknameDiv.style.display = "none";
+              nicknameInput.style.display = "none";
+              resolve();
+            }, 500);
+          }).then(() => {
+            emotarCloneDiv.remove();
+          });
+        });
+      }
+      addEventIfNotRegistered(confirmEmotarButton, 'click', () => {
+        if (selectedEmotar) {
+          confirmEmotarButton.disabled = true;
+          confirmSelectEmotar(selectedEmotar);
+        }
+      });
+
+      renderEmotars();
+    }
+    initLandingScreen();
+
+    function setupWebsocket(webSocket) {
+      const onmessage = (event) => {
+        const notification = JSON.parse(event.data);
+        console.log("[ws] notification:", notification.kind, notification);
+        switch (notification.kind) {
+          case "player-join": {
+            const newPlayer = notification.data.player;
+            const newPlayerName = newPlayer.name + " " + newPlayer.emotar;
+            if (app.clientPlayer && newPlayer.id !== app.clientPlayer.id) {
+              displayMessage(newPlayerName + " se sumó a la olla!");
+            }
+            app.encounter = notification.data.encounter;
+            renderEncounter();
+            break;
+          }
+          case "encounter-quit": {
+            const quitPlayer = notification.data.player;
+            if (quitPlayer && app.clientPlayer && quitPlayer.id !== app.clientPlayer.id) {
+              const quitPlayerName = quitPlayer.name + " " + quitPlayer.emotar;
+              displayMessage(quitPlayerName + " salió de la olla");
+            }
+            app.encounter = notification.data.encounter;
+            renderEncounter();
+            break;
+          }
+          case "counter-incremented": {
+            app.encounter = notification.data.encounter;
+            renderEncounter();
+            break;
+          }
+          case "counter-reset": {
+            app.encounter = notification.data;
+            renderEncounter();
+            displayMessage("¡Contadores reseteados!");
+            break;
+          }
+          case "updated": {
+            app.encounter = notification.data;
+            renderEncounter();
+            break;
+          }
+          default:
+            console.log("not processing ", notification?.kind);
+            break;
+        }
+      };
+      webSocket.addEventListener("message", onmessage);
+      window.addEventListener("beforeunload", () => {
+        webSocket.removeEventListener("message", onmessage);
+      });
+    }
+
+    function renderEncounter() {
+      const enc = app.encounter;
+      if (!enc) {
+        return;
+      }
+      document.getElementById("encounter-description").innerText = `${enc.name} (#${enc.id})`;
+
+      const list = document.getElementById("participants-list");
+      list.innerHTML = '';
+      enc.players.forEach((player) => {
+        const li = document.createElement('li');
+        const count = (enc.countByPlayerId && enc.countByPlayerId[player.id]) || 0;
+        const isYou = app.clientPlayer && player.id === app.clientPlayer.id;
+        if (isYou) {
+          li.classList.add('you');
+        }
+        const label = document.createElement('span');
+        label.textContent = `${player.emotar} ${player.name}${isYou ? " (vos)" : ""}`;
+        const countSpan = document.createElement('span');
+        countSpan.className = 'participant-count';
+        countSpan.textContent = count;
+        li.appendChild(label);
+        li.appendChild(countSpan);
+        list.appendChild(li);
+      });
+
+      document.getElementById("total-served-count").innerText = totalCount(enc);
+
+      const isOwner = app.clientPlayer && enc.owner && enc.owner.id === app.clientPlayer.id;
+      const ownerActions = document.getElementById("owner-actions");
+      ownerActions.style.display = isOwner ? "flex" : "none";
+    }
+
+    addEventIfNotRegistered(document.getElementById("increment-button"), 'click', async () => {
+      if (!app.encounter) {
+        return;
+      }
+      try {
+        const payload = await ServerApi.DefaultService.incrementCounter(app.encounter.id);
+        app.encounter = payload.encounter;
+        renderEncounter();
+      } catch (err) {
+        displayErrorMessage(err.message || err);
+      }
+    });
+
+    addEventIfNotRegistered(document.getElementById("reset-button"), 'click', async () => {
+      if (!app.encounter) {
+        return;
+      }
+      const ok = confirm("¿Resetear todos los contadores de esta olla?");
+      if (!ok) {
+        return;
+      }
+      try {
+        const updated = await ServerApi.DefaultService.resetCounters(app.encounter.id);
+        app.encounter = updated;
+        renderEncounter();
+      } catch (err) {
+        displayErrorMessage(err.message || err);
+      }
+    });
+
+    addEventIfNotRegistered(document.getElementById("export-button"), 'click', () => {
+      exportEncounterAsJson(app.encounter);
+    });
+  </script>
+  <script type="module">
+    document.getElementById("share-button").addEventListener("click", () => {
+      const currentUrl = window.location.origin + window.location.pathname;
+
+      if (!app.encounter) {
+        return;
+      }
+      const encounterId = app.encounter.id;
+      const shareUrl = `${currentUrl}?encounter-id=${encounterId}`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: "Sumate a la olla",
+          text: "¡Sumate a contar platos servidos! 🍲",
+          url: shareUrl,
+        })
+          .then(() => displayMessage("¡Compartido exitosamente!"))
+          .catch((error) => displayErrorMessage("Error al compartir:", error));
+      } else {
+        navigator.clipboard
+          .writeText(shareUrl)
+          .then(() => displayMessage("¡Enlace copiado, ya podés compartirlo! 🗣️🍲"))
+          .catch((error) => displayErrorMessage("Error al copiar enlace:", error));
+      }
+    });
+
+    const currentUrl = new URL(window.location.href);
+    const searchParams = new URLSearchParams(currentUrl.search);
+    const encounterId = searchParams.get('encounter-id');
+    if (encounterId) {
+      document.getElementById("encounter-id-to-join").value = encounterId;
+    }
+  </script>
+
+</body>
+</html>

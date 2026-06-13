@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acerca de</title>
+  <style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+
+  .vertical-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #logo-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+  }
+  .square {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    left: 50px;
+    top: 50px;
+    background-color: black;
+    animation-duration: 1.5s;
+    animation-timing-function: ease;
+    animation-fill-mode: forwards;
+    border-radius: 7px;
+  }
+  .up    { animation-name: move-up; }
+  .left  { animation-name: move-left; }
+  .down  { animation-name: move-down; }
+  .right { animation-name: move-right; }
+  @keyframes move-up    { 100% { transform: translateY(45px);  background-color: #51ca51; } }
+  @keyframes move-left  { 100% { transform: translateX(45px);  background-color: #5151ca; } }
+  @keyframes move-down  { 100% { transform: translateY(-45px); background-color: #ca5151; } }
+  @keyframes move-right { 100% { transform: translateX(-45px); background-color: #caca51; } }
+  </style>
+</head>
+<body>
+
+  <div class="vertical-center">
+    <h2>🍲 Hormi Meals Counter</h2>
+    <div id="logo-container">
+      <div class="square up"></div>
+      <div class="square left"></div>
+      <div class="square down"></div>
+      <div class="square right"></div>
+    </div>
+    <section>
+      <p>
+        App colaborativa en vivo para llevar la cuenta de platos servidos en las <strong>ollas populares</strong> de los lunes. Cada participante registra cuántas raciones entregó con un simple <em>+1</em>, y todos en la olla ven el total actualizarse al instante.
+      </p>
+      <h3>🚶 Cómo se usa:</h3>
+      <ul>
+        <li>🪞 <strong>Elegí tu Emotar</strong> y un apodo — ese va a ser tu identidad en la olla.</li>
+        <li>✨ <strong>Crear una olla nueva:</strong> dejá vacío el campo de número y, opcionalmente, ponele un nombre (ej: "Olla del lunes 15/06"). Si no, se llamará "Olla de &lt;apodo&gt;".</li>
+        <li>🤝 <strong>Sumarte a una olla existente:</strong> ingresá el <em>número de olla</em> que te pasó el organizador y listo.</li>
+        <li>➕ Cada vez que servís un plato, apretás el botón gigante <strong>+1 🍲</strong>. Tu contador sube y todos en la olla lo ven en vivo.</li>
+      </ul>
+      <h3>👑 Si vos creaste la olla:</h3>
+      <ul>
+        <li>🔄 <strong>Reset</strong> — vuelve todos los contadores a cero (útil si querés arrancar de nuevo).</li>
+        <li>⬇️ <strong>Exportar JSON</strong> — descargás el estado completo de la olla (participantes, contadores, totales, timestamp) para guardarlo en tu compu y tener el histórico.</li>
+      </ul>
+      <p>
+        🐜 <strong>"Hormi"</strong> porque cada plato suma, como las hormigas: una atrás de otra, en silencio, vamos juntos.
+      </p>
+    </section>
+    <h2><a href="https://github.com/vituchon/hormi-meals-counter">Código@github</a></h2>
+    <button onclick="document.getElementById('about-dialog').close()">Cerrar</button>
+  </div>
+</body>
+</html>
