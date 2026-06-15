@@ -288,6 +288,22 @@
       text-align: center;
     }
 
+    .serve-burst {
+      position: fixed;
+      pointer-events: none;
+      font-size: 1.8em;
+      z-index: 2000;
+      animation: serve-rise 1.2s ease-out forwards;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 2px 4px rgba(58, 36, 21, 0.35));
+    }
+
+    @keyframes serve-rise {
+      0%   { transform: translate(-50%, 0)     scale(0.7); opacity: 0; }
+      15%  { transform: translate(-50%, -10px) scale(1.25); opacity: 1; }
+      100% { transform: translate(-50%, -90px) scale(0.95); opacity: 0; }
+    }
+
     #total-served {
       color: var(--terracotta-dark);
       font-weight: 700;
@@ -808,6 +824,7 @@
           case "counter-incremented": {
             app.encounter = notification.data.encounter;
             renderEncounter();
+            spawnServeBurst(notification.data.playerId);
             break;
           }
           case "counter-reset": {
@@ -832,6 +849,29 @@
       });
     }
 
+    function spawnServeBurst(playerId) {
+      const list = document.getElementById('participants-list');
+      if (!list) {
+        return;
+      }
+      const targetLi = list.querySelector(`li[data-player-id="${playerId}"]`);
+      if (!targetLi) {
+        return;
+      }
+      const targetSpan = targetLi.querySelector('.participant-count');
+      if (!targetSpan) {
+        return;
+      }
+      const rect = targetSpan.getBoundingClientRect();
+      const burst = document.createElement('span');
+      burst.className = 'serve-burst';
+      burst.textContent = '🍲';
+      burst.style.left = `${rect.left + rect.width / 2}px`;
+      burst.style.top = `${rect.top}px`;
+      document.body.appendChild(burst);
+      burst.addEventListener('animationend', () => burst.remove(), { once: true });
+    }
+
     function renderEncounter() {
       const enc = app.encounter;
       if (!enc) {
@@ -843,6 +883,7 @@
       list.innerHTML = '';
       enc.players.forEach((player) => {
         const li = document.createElement('li');
+        li.dataset.playerId = player.id;
         const count = (enc.countByPlayerId && enc.countByPlayerId[player.id]) || 0;
         const isYou = app.clientPlayer && player.id === app.clientPlayer.id;
         if (isYou) {
