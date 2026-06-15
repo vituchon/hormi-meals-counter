@@ -1,7 +1,26 @@
 var app = {
   encounter: null,
   clientPlayer: null,
+  soundAllowed: true,
 };
+
+function playClickSound() {
+  if (!app.soundAllowed) {
+    return;
+  }
+  const click = new Audio('/assets/crunch.mp3');
+  click.currentTime = 0;
+  click.play().catch(() => {});
+}
+
+function playWelcomeSound() {
+  if (!app.soundAllowed) {
+    return;
+  }
+  const horn = new Audio('/assets/party-horn.mp3');
+  horn.currentTime = 0;
+  horn.play().catch(() => {});
+}
 
 function addEventIfNotRegistered(element, event, callback) {
   const attributeName = `data-event-${event}`;

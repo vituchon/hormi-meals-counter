@@ -103,6 +103,7 @@ func buildRouter() *mux.Router {
 	apiGet("/players", controllers.GetPlayers)
 
 	apiGet("/encounters", controllers.GetEncounters)
+	apiGet("/encounters/{id:[0-9]+}", controllers.GetEncounterById)
 	apiPost("/encounters", controllers.CreateEncounter)
 	apiDelete("/encounters", func(w http.ResponseWriter, r *http.Request) {
 		AdminClientMiddleware(http.HandlerFunc(controllers.DeleteEncounters)).ServeHTTP(w, r)

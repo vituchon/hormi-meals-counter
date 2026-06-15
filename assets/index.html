@@ -98,12 +98,12 @@
       offset-path: inset(-9px round 18px);
       /*offset-rotate: 0deg; */ /* uncomment to keep them all horizontal */
       transform: scaleX(-1);
-      animation: ant-stroll 22s linear infinite;
+      animation: ant-stroll 21s linear infinite;
     }
 
     .ant-walker .ant-1 { animation-delay: 0s; }
-    .ant-walker .ant-2 { animation-delay: -7.3s; }
-    .ant-walker .ant-3 { animation-delay: -14.6s; }
+    .ant-walker .ant-2 { animation-delay: -7s; }
+    .ant-walker .ant-3 { animation-delay: -14s; }
 
     @keyframes ant-stroll {
       from { offset-distance: 0%; }
@@ -365,6 +365,39 @@
       align-items: center;
     }
 
+    #encounter-join-hint {
+      margin-top: 5px;
+      margin-bottom: 12px;
+      padding: 10px 14px;
+      background: var(--cream-soft);
+      border: 1.5px dashed var(--terracotta-light);
+      border-radius: 10px;
+      color: var(--terracotta-dark);
+      font-weight: 700;
+      font-size: 1em;
+      line-height: 1.2;
+    }
+
+    #encounter-join-hint .hint-id {
+      font-variant-numeric: tabular-nums;
+    }
+
+    #encounter-join-hint .hint-meta {
+      display: block;
+      margin-top: 6px;
+      font-weight: 500;
+      font-size: 0.88em;
+      color: var(--roast-soft);
+    }
+
+    #encounter-join-loading {
+      margin: -6px 0 12px;
+      font-size: 0.85em;
+      color: var(--roast-soft);
+      font-style: italic;
+      opacity: 0.85;
+    }
+
     #share-button:hover {
       transform: scale(1.3);
       box-shadow: 0px 6px 12px rgba(58, 36, 21, 0.35);
@@ -376,7 +409,7 @@
     }
   </style>
   <style>
-    #delete-encounters-button-container, #about-button-container {
+    #delete-encounters-button-container, #about-button-container, #sound-button-container {
       position: fixed;
       z-index: 1000;
     }
@@ -384,6 +417,40 @@
     #delete-encounters-button-container {
       top: 10px;
       left: 10px;
+    }
+
+    #sound-button-container {
+      top: 10px;
+      right: 10px;
+    }
+
+    #sound-button {
+      background: var(--olive);
+      color: var(--cream);
+      font-size: 13px;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 700;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+      box-shadow: 0px 4px 8px rgba(58, 36, 21, 0.25);
+    }
+
+    #sound-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0px 6px 12px rgba(58, 36, 21, 0.3);
+    }
+
+    #sound-button:active {
+      transform: scale(0.95);
+      box-shadow: 0px 3px 6px rgba(58, 36, 21, 0.3);
+    }
+
+    #sound-button.muted {
+      background: var(--roast-soft);
+      filter: grayscale(0.4);
     }
 
     #delete-encounters-button {
@@ -444,6 +511,10 @@
     </button>
   </div>
 
+  <div id="sound-button-container">
+    <button id="sound-button">🔊 Sonido</button>
+  </div>
+
   <div id="about-button-container">
     <button id="about-button" style="color: transparent;  text-shadow: 0 0 0 white;">❔</button>
   </div>
@@ -493,7 +564,9 @@
       </div>
       <div style="display: flex; flex-direction: column; align-items: center; margin-top: 0.5em;">
         <input id="encounter-name-input" type="text" placeholder="Nombre de la olla (si vas a crear)...">
-        <input id="encounter-id-to-join" type="number" placeholder="Unirse a olla número...">
+        <div id="encounter-join-hint" style="display: none;"></div>
+        <div id="encounter-join-loading" style="display: none;"></div>
+        <input id="encounter-id-to-join" type="hidden">
       </div>
     </div>
     <div id="nickname-view" style="font-size: 3em;"></div>
@@ -545,6 +618,22 @@
           }
         }
       });
+
+      const soundButton = document.getElementById('sound-button');
+      function refreshSoundButton() {
+        if (app.soundAllowed) {
+          soundButton.textContent = '🔊 Sonido';
+          soundButton.classList.remove('muted');
+        } else {
+          soundButton.textContent = '🔇 Mute';
+          soundButton.classList.add('muted');
+        }
+      }
+      soundButton.addEventListener('click', () => {
+        app.soundAllowed = !app.soundAllowed;
+        refreshSoundButton();
+      });
+      refreshSoundButton();
     }
     initAppContainerScreen();
   </script>
@@ -593,6 +682,7 @@
       }
 
       function confirmSelectEmotar(emotar) {
+        playWelcomeSound();
         const emotarDiv = document.getElementById(emotar);
         const emotarDivRect = emotarDiv.getBoundingClientRect();
         const emotarCloneDiv = emotarDiv.cloneNode(true);
@@ -779,6 +869,7 @@
       if (!app.encounter) {
         return;
       }
+      playClickSound();
       try {
         const payload = await ServerApi.DefaultService.incrementCounter(app.encounter.id);
         app.encounter = payload.encounter;
@@ -810,6 +901,8 @@
     });
   </script>
   <script type="module">
+    import * as ServerApi from "./assets/server-api.js"
+
     document.getElementById("share-button").addEventListener("click", () => {
       const currentUrl = window.location.origin + window.location.pathname;
 
@@ -817,12 +910,13 @@
         return;
       }
       const encounterId = app.encounter.id;
+      const encounterName = app.encounter.name;
       const shareUrl = `${currentUrl}?encounter-id=${encounterId}`;
 
       if (navigator.share) {
         navigator.share({
-          title: "Sumate a la olla",
-          text: "¡Sumate a contar platos servidos! 🍲",
+          title: `Sumate a la olla "${encounterName}"`,
+          text: `¡Sumate a contar platos servidos en "${encounterName}"! 🍲`,
           url: shareUrl,
         })
           .then(() => displayMessage("¡Compartido exitosamente!"))
@@ -835,11 +929,59 @@
       }
     });
 
+    function renderJoinHint(hintEl, name, id, antCount) {
+      hintEl.textContent = '';
+      hintEl.appendChild(document.createTextNode('Te vas a sumar a la olla '));
+      if (name) {
+        const strong = document.createElement('strong');
+        strong.textContent = `"${name}"`;
+        hintEl.appendChild(strong);
+        hintEl.appendChild(document.createTextNode(' '));
+        const idSpan = document.createElement('span');
+        idSpan.className = 'hint-id';
+        idSpan.textContent = `(#${id})`;
+        hintEl.appendChild(idSpan);
+        if (typeof antCount === 'number') {
+          const metaSpan = document.createElement('span');
+          metaSpan.className = 'hint-meta';
+          const noun = antCount === 1 ? 'hormiga sumada' : 'hormigas sumadas';
+          metaSpan.textContent = `🐜 ${antCount} ${noun}`;
+          hintEl.appendChild(metaSpan);
+        }
+      } else {
+        const idSpan = document.createElement('span');
+        idSpan.className = 'hint-id';
+        idSpan.textContent = `#${id}`;
+        hintEl.appendChild(idSpan);
+      }
+    }
+
     const currentUrl = new URL(window.location.href);
     const searchParams = new URLSearchParams(currentUrl.search);
     const encounterId = searchParams.get('encounter-id');
     if (encounterId) {
       document.getElementById("encounter-id-to-join").value = encounterId;
+      document.getElementById("encounter-name-input").style.display = "none";
+
+      const hintEl = document.getElementById("encounter-join-hint");
+      const loadingEl = document.getElementById("encounter-join-loading");
+
+      renderJoinHint(hintEl, null, encounterId);
+      hintEl.style.display = "block";
+
+      loadingEl.textContent = `Recuperando datos del encuentro #${encounterId}…`;
+      loadingEl.style.display = "block";
+
+      ServerApi.DefaultService.getEncounter(encounterId).then((encounter) => {
+        if (encounter?.name) {
+          const antCount = encounter.players?.length ?? 0;
+          renderJoinHint(hintEl, encounter.name, encounter.id, antCount);
+        }
+      }).catch((err) => {
+        console.warn('No se pudo obtener detalle de la olla:', err);
+      }).finally(() => {
+        loadingEl.style.display = "none";
+      });
     }
   </script>
 

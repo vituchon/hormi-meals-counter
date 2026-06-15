@@ -51,6 +51,27 @@ class Service {
       });
   }
 
+  getEncounter(encounterId) {
+      const requestInit = {
+          method: 'GET',
+          headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+          },
+      };
+      return fetch(`/api/v1/encounters/${encounterId}`, requestInit).then((r) => {
+          if (!r.ok) {
+              return handleFetchResponseError(r);
+          }
+          return r.json().then((encounter) => {
+              return encounter;
+          });
+      }).catch((err) => {
+          console.error('Failed to fetch encounter:', err);
+          throw err;
+      });
+  }
+
   createEncounter(encounter) {
     const requestInit = {
         method: 'POST',
