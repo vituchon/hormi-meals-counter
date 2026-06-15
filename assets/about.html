@@ -42,6 +42,34 @@
   @keyframes move-left  { 100% { transform: translateX(45px);  background-color: #5151ca; } }
   @keyframes move-down  { 100% { transform: translateY(-45px); background-color: #ca5151; } }
   @keyframes move-right { 100% { transform: translateX(-45px); background-color: #caca51; } }
+
+  .hormis-section {
+    margin-top: 1.5em;
+    text-align: center;
+  }
+
+  .hormis-photo {
+    max-width: 100%;
+    width: 320px;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    margin: 0.6em 0;
+  }
+
+  .code-link a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .code-link img {
+    width: auto;
+    border-radius: 10px;
+  }
   </style>
 </head>
 <body>
@@ -74,7 +102,22 @@
         🐜 <strong>"Hormi"</strong> porque cada plato suma, como las hormigas: una atrás de otra, en silencio, vamos juntos.
       </p>
     </section>
-    <h2><a href="https://github.com/vituchon/hormi-meals-counter">Código@github</a></h2>
+    <section class="hormis-section">
+      <h3>👋 ¿Quiénes somos?</h3>
+      <img src="/assets/the_hormis.jpeg" alt="Las Hormigas Rebeldes en la olla" class="hormis-photo">
+      <p>
+        Somos las <strong>🐜 Hormigas Rebeldes</strong>, las personas que estamos detrás de las ollas populares de los lunes. Cada plato suma.
+      </p>
+      <p>
+        <a href="https://hormigas-rebeldes.vercel.app/" target="_blank" rel="noopener noreferrer">🌐 hormigas-rebeldes.vercel.app</a>
+      </p>
+    </section>
+    <h2 class="code-link">
+      <a href="https://github.com/vituchon/hormi-meals-counter" target="_blank" rel="noopener noreferrer">
+        Código@github
+        <img src="/assets/worker.jpeg" alt="Workers">
+      </a>
+    </h2>
     <button onclick="document.getElementById('about-dialog').close()">Cerrar</button>
   </div>
 </body>
